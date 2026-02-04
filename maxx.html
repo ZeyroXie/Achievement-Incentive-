@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Achievements and Incentive Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #dc143c 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #dc143c;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .input-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .input-section h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1.1em;
+            background-color: white;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #dc143c;
+            box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.1);
+        }
+
+        .results-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .value {
+            color: #dc143c;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .progress-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 45px;
+            border-radius: 25px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-bar {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            position: absolute;
+            left: 0; top: 0;
+        }
+
+        .progress-bar.low { background: #ff4444; }
+        .progress-bar.medium { background: #ffaa00; }
+        .progress-bar.high { background: #00cc00; }
+
+        .progress-percentage {
+            position: relative;
+            z-index: 10;
+            font-weight: 800;
+            color: #333;
+        }
+
+        .incentive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .incentive-card {
+            background: linear-gradient(135deg, #dc143c 0%, #8b0000 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .incentive-card .amount {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .target-calculator {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .target-results {
+            display: none;
+            margin-top: 20px;
+            background: #fdf2f2;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #dc143c;
+        }
+
+        .target-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .target-item .val { font-weight: 700; color: #dc143c; }
+
+        .chart-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .chart-grid {
+            display: none;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .chart-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .chart-item .t { font-weight: 700; color: #dc143c; }
+        
+        .toggle-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+            color: #dc143c;
+        }
+        
+        .rotated {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Achievements and Incentive Calculator</h1>
+        </div>
+
+        <div class="input-section">
+            <h2>📊 Performance Input</h2>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Daily Target (Attributes)</label>
+                    <input type="number" id="dailyTarget" value="4450" oninput="autoCalculate()">
+                </div>
+                <div class="input-group">
+                    <label>Total Working Days</label>
+                    <input type="number" id="totalWorkingDays" value="21" oninput="autoCalculate()">
+                </div>
+                <div class="input-group">
+                    <label>Days Worked So Far</label>
+                    <input type="number" id="daysWorked" placeholder="Enter days..." oninput="autoCalculate()">
+                </div>
+                <div class="input-group">
+                    <label>Attributes Completed So Far</label>
+                    <input type="number" id="attributes" placeholder="Enter count..." oninput="autoCalculate()">
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section" id="results">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Target for Days Worked</h3>
+                    <div class="value" id="currentPeriodTarget">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Current Achievement</h3>
+                    <div class="value" id="achievementPercent">0%</div>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                    <div class="progress-percentage" id="progressPercent">0%</div>
+                </div>
+            </div>
+
+            <div class="incentive-grid">
+                <div class="incentive-card">
+                    <h3>Potential Monthly Incentive</h3>
+                    <div class="amount" id="monthlyIncentive">Rs. 0</div>
+                    <p id="tierInfo"></p>
+                </div>
+                <div class="incentive-card">
+                    <h3>Prorated Incentive (Earned)</h3>
+                    <div class="amount" id="currentIncentive">Rs. 0</div>
+                    <p id="daysInfo"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="target-calculator">
+            <h2>🎯 Target Goal Calculator</h2>
+            <div class="input-group">
+                <label>Select Target Achievement Percentage (%)</label>
+                <select id="targetPercent" onchange="calculateTargetAttributes()">
+                    <option value="" selected disabled>Choose a goal...</option>
+                </select>
+            </div>
+
+            <div class="target-results" id="targetResults">
+                <div class="target-item">
+                    <span>Days Remaining:</span>
+                    <span class="val" id="daysLeft">0 days</span>
+                </div>
+                <div class="target-item">
+                    <span>More Attributes Required:</span>
+                    <span class="val" id="moreNeeded">0</span>
+                </div>
+                <div class="target-item">
+                    <span>Total Attributes Needed:</span>
+                    <span class="val" id="totalAttributesNeeded">0</span>
+                </div>
+                <div class="target-item">
+                    <span>Current Attributes:</span>
+                    <span class="val" id="currentAttrDisplay">0</span>
+                </div>
+                <div class="target-item">
+                    <span>Potential Incentive:</span>
+                    <span class="val" id="potentialIncentiveDisplay">Rs. 0 (0% tier)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <div class="chart-header" onclick="toggleChart()">
+                <h2>💰 Incentive Chart</h2>
+                <span class="toggle-icon" id="toggleIcon">▼</span>
+            </div>
+            <div class="chart-grid" id="chartGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        const incentiveTiers = [
+            { p: 90, a: 4000 }, { p: 100, a: 7000 }, { p: 110, a: 8000 }, { p: 120, a: 10000 },
+            { p: 130, a: 12000 }, { p: 140, a: 13500 }, { p: 150, a: 16500 }, { p: 160, a: 18000 },
+            { p: 170, a: 19500 }, { p: 180, a: 21500 }, { p: 190, a: 23000 }, { p: 200, a: 25000 },
+            { p: 210, a: 26500 }, { p: 220, a: 28000 }, { p: 230, a: 30000 }, { p: 240, a: 32000 },
+            { p: 250, a: 33500 }, { p: 260, a: 35000 }, { p: 270, a: 36500 }, { p: 280, a: 37500 },
+            { p: 290, a: 40000 }, { p: 300, a: 41333 }, { p: 310, a: 42667 }, { p: 320, a: 44000 },
+            { p: 330, a: 45333 }, { p: 340, a: 46667 }, { p: 350, a: 48000 }, { p: 360, a: 49333 },
+            { p: 370, a: 50667 }, { p: 380, a: 52000 }, { p: 390, a: 53333 }, { p: 400, a: 54666 }
+        ];
+
+        function populateDropdown() {
+            const select = document.getElementById('targetPercent');
+            incentiveTiers.forEach(tier => {
+                const opt = document.createElement('option');
+                opt.value = tier.p;
+                opt.textContent = tier.p + '% Achievement';
+                select.appendChild(opt);
+            });
+        }
+
+        function generateChart() {
+            const grid = document.getElementById('chartGrid');
+            grid.innerHTML = incentiveTiers.map(t => `
+                <div class="chart-item">
+                    <div class="t">${t.p}%</div>
+                    <div>Rs. ${t.a.toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function getTierData(percent) {
+            for (let i = incentiveTiers.length - 1; i >= 0; i--) {
+                if (percent >= incentiveTiers[i].p) return incentiveTiers[i];
+            }
+            return { p: 0, a: 0 };
+        }
+
+        function autoCalculate() {
+            const daily = parseInt(document.getElementById('dailyTarget').value) || 0;
+            const totalDays = parseInt(document.getElementById('totalWorkingDays').value) || 21;
+            const daysDone = parseInt(document.getElementById('daysWorked').value);
+            const completed = parseInt(document.getElementById('attributes').value);
+
+            if (isNaN(daysDone) || isNaN(completed)) {
+                document.getElementById('results').style.display = 'none';
+                return;
+            }
+
+            const currentPeriodTarget = daily * daysDone;
+            const achievementPercent = (currentPeriodTarget > 0) ? (completed / currentPeriodTarget) * 100 : 0;
+            const tier = getTierData(achievementPercent);
+            const earned = (tier.a / totalDays) * daysDone;
+
+            document.getElementById('currentPeriodTarget').textContent = currentPeriodTarget.toLocaleString();
+            document.getElementById('achievementPercent').textContent = achievementPercent.toFixed(2) + '%';
+            
+            const bar = document.getElementById('progressBar');
+            bar.style.width = Math.min(achievementPercent, 100) + '%';
+            bar.className = 'progress-bar ' + (achievementPercent < 90 ? 'low' : achievementPercent < 110 ? 'medium' : 'high');
+            document.getElementById('progressPercent').textContent = achievementPercent.toFixed(2) + '%';
+
+            document.getElementById('monthlyIncentive').textContent = 'Rs. ' + tier.a.toLocaleString();
+            document.getElementById('currentIncentive').textContent = 'Rs. ' + Math.round(earned).toLocaleString();
+            document.getElementById('daysInfo').textContent = `(${daysDone} / ${totalDays} Days Worked)`;
+            document.getElementById('tierInfo').textContent = `Tier Reached: ${tier.p}%`;
+
+            document.getElementById('results').style.display = 'block';
+            calculateTargetAttributes(); 
+        }
+
+        function calculateTargetAttributes() {
+            const targetP = parseFloat(document.getElementById('targetPercent').value);
+            const daily = parseInt(document.getElementById('dailyTarget').value) || 0;
+            const totalDays = parseInt(document.getElementById('totalWorkingDays').value) || 21;
+            const daysDone = parseInt(document.getElementById('daysWorked').value) || 0;
+            const completed = parseInt(document.getElementById('attributes').value) || 0;
+
+            if (isNaN(targetP) || daysDone === 0) {
+                document.getElementById('targetResults').style.display = 'none';
+                return;
+            }
+
+            const daysLeft = totalDays - daysDone;
+            // FIXED LOGIC: Target attributes based on DAYS WORKED SO FAR
+            const currentPeriodTargetBase = daily * daysDone;
+            const totalRequiredForTier = Math.ceil((targetP / 100) * currentPeriodTargetBase);
+            const moreNeeded = Math.max(0, totalRequiredForTier - completed);
+            const targetTier = getTierData(targetP);
+
+            document.getElementById('daysLeft').textContent = (daysLeft < 0 ? 0 : daysLeft) + " days";
+            document.getElementById('moreNeeded').textContent = moreNeeded.toLocaleString();
+            document.getElementById('totalAttributesNeeded').textContent = totalRequiredForTier.toLocaleString();
+            document.getElementById('currentAttrDisplay').textContent = completed.toLocaleString();
+            document.getElementById('potentialIncentiveDisplay').textContent = `Rs. ${targetTier.a.toLocaleString()} (${targetTier.p}% tier)`;
+            
+            document.getElementById('targetResults').style.display = 'block';
+        }
+
+        function toggleChart() {
+            const g = document.getElementById('chartGrid');
+            const icon = document.getElementById('toggleIcon');
+            const isHidden = g.style.display === 'none' || g.style.display === '';
+            
+            g.style.display = isHidden ? 'grid' : 'none';
+            if(isHidden) icon.classList.add('rotated');
+            else icon.classList.remove('rotated');
+        }
+
+        populateDropdown();
+        generateChart();
+    </script>
+</body>
+</html>
