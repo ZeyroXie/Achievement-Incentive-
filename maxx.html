@@ -235,15 +235,43 @@
         }
 
         .chart-item .t { font-weight: 700; color: #dc143c; }
-        
+
         .toggle-icon {
             font-size: 1.5rem;
             transition: transform 0.3s;
             color: #dc143c;
         }
-        
+
         .rotated {
             transform: rotate(180deg);
+        }
+
+        .site-footer {
+            margin-top: 30px;
+            padding: 22px 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 0.95rem;
+            letter-spacing: 0.2px;
+        }
+
+        .site-footer .company-name {
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .site-footer .copyright-line {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 12px 18px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+            backdrop-filter: blur(8px);
         }
     </style>
 </head>
@@ -258,19 +286,19 @@
             <div class="input-grid">
                 <div class="input-group">
                     <label>Daily Target (Attributes)</label>
-                    <input type="number" id="dailyTarget" value="4450" oninput="autoCalculate()">
+                    <input type="number" id="dailyTarget" value="2500" step="any" inputmode="decimal" oninput="autoCalculate()">
                 </div>
                 <div class="input-group">
                     <label>Total Working Days</label>
-                    <input type="number" id="totalWorkingDays" value="21" oninput="autoCalculate()">
+                    <input type="number" id="totalWorkingDays" value="24" step="any" inputmode="decimal" oninput="autoCalculate()">
                 </div>
                 <div class="input-group">
                     <label>Days Worked So Far</label>
-                    <input type="number" id="daysWorked" placeholder="Enter days..." oninput="autoCalculate()">
+                    <input type="number" id="daysWorked" step="any" inputmode="decimal" placeholder="Enter days..." oninput="autoCalculate()">
                 </div>
                 <div class="input-group">
                     <label>Attributes Completed So Far</label>
-                    <input type="number" id="attributes" placeholder="Enter count..." oninput="autoCalculate()">
+                    <input type="number" id="attributes" step="any" inputmode="decimal" placeholder="Enter count..." oninput="autoCalculate()">
                 </div>
             </div>
         </div>
@@ -348,6 +376,14 @@
             </div>
             <div class="chart-grid" id="chartGrid"></div>
         </div>
+
+        <footer class="site-footer">
+            <div class="copyright-line">
+                <span>© <span id="copyrightYear"></span></span>
+                <span class="company-name">ZeyroX</span>
+                <span>All rights reserved.</span>
+            </div>
+        </footer>
     </div>
 
     <script>
@@ -389,13 +425,32 @@
             return { p: 0, a: 0 };
         }
 
-        function autoCalculate() {
-            const daily = parseInt(document.getElementById('dailyTarget').value) || 0;
-            const totalDays = parseInt(document.getElementById('totalWorkingDays').value) || 21;
-            const daysDone = parseInt(document.getElementById('daysWorked').value);
-            const completed = parseInt(document.getElementById('attributes').value);
+        function readNumber(id, fallback = 0) {
+            const value = parseFloat(document.getElementById(id).value);
+            return Number.isFinite(value) ? value : fallback;
+        }
 
-            if (isNaN(daysDone) || isNaN(completed)) {
+        function formatDecimal(value, maxDecimals = 2) {
+            return Number(value).toLocaleString(undefined, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: maxDecimals
+            });
+        }
+
+        function formatCurrency(value) {
+            return 'Rs. ' + Number(value).toLocaleString(undefined, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function autoCalculate() {
+            const daily = readNumber('dailyTarget', 0);
+            const totalDays = readNumber('totalWorkingDays', 24);
+            const daysDone = readNumber('daysWorked', NaN);
+            const completed = readNumber('attributes', NaN);
+
+            if (!Number.isFinite(daysDone) || !Number.isFinite(completed)) {
                 document.getElementById('results').style.display = 'none';
                 return;
             }
@@ -403,19 +458,19 @@
             const currentPeriodTarget = daily * daysDone;
             const achievementPercent = (currentPeriodTarget > 0) ? (completed / currentPeriodTarget) * 100 : 0;
             const tier = getTierData(achievementPercent);
-            const earned = (tier.a / totalDays) * daysDone;
+            const earned = (totalDays > 0) ? (tier.a / totalDays) * daysDone : 0;
 
-            document.getElementById('currentPeriodTarget').textContent = currentPeriodTarget.toLocaleString();
+            document.getElementById('currentPeriodTarget').textContent = formatDecimal(currentPeriodTarget);
             document.getElementById('achievementPercent').textContent = achievementPercent.toFixed(2) + '%';
-            
+
             const bar = document.getElementById('progressBar');
-            bar.style.width = Math.min(achievementPercent, 100) + '%';
+            bar.style.width = Math.min(Math.max(achievementPercent, 0), 100) + '%';
             bar.className = 'progress-bar ' + (achievementPercent < 90 ? 'low' : achievementPercent < 110 ? 'medium' : 'high');
             document.getElementById('progressPercent').textContent = achievementPercent.toFixed(2) + '%';
 
-            document.getElementById('monthlyIncentive').textContent = 'Rs. ' + tier.a.toLocaleString();
-            document.getElementById('currentIncentive').textContent = 'Rs. ' + Math.round(earned).toLocaleString();
-            document.getElementById('daysInfo').textContent = `(${daysDone} / ${totalDays} Days Worked)`;
+            document.getElementById('monthlyIncentive').textContent = formatCurrency(tier.a);
+            document.getElementById('currentIncentive').textContent = formatCurrency(earned);
+            document.getElementById('daysInfo').textContent = `(${formatDecimal(daysDone)} / ${formatDecimal(totalDays)} Days Worked)`;
             document.getElementById('tierInfo').textContent = `Tier Reached: ${tier.p}%`;
 
             document.getElementById('results').style.display = 'block';
@@ -423,30 +478,30 @@
         }
 
         function calculateTargetAttributes() {
-            const targetP = parseFloat(document.getElementById('targetPercent').value);
-            const daily = parseInt(document.getElementById('dailyTarget').value) || 0;
-            const totalDays = parseInt(document.getElementById('totalWorkingDays').value) || 21;
-            const daysDone = parseInt(document.getElementById('daysWorked').value) || 0;
-            const completed = parseInt(document.getElementById('attributes').value) || 0;
+            const targetP = readNumber('targetPercent', NaN);
+            const daily = readNumber('dailyTarget', 0);
+            const totalDays = readNumber('totalWorkingDays', 24);
+            const daysDone = readNumber('daysWorked', 0);
+            const completed = readNumber('attributes', 0);
 
-            if (isNaN(targetP) || daysDone === 0) {
+            if (!Number.isFinite(targetP) || daysDone === 0) {
                 document.getElementById('targetResults').style.display = 'none';
                 return;
             }
 
             const daysLeft = totalDays - daysDone;
-            // FIXED LOGIC: Target attributes based on DAYS WORKED SO FAR
+            // Decimal-friendly logic: target attributes are based on DAYS WORKED SO FAR.
             const currentPeriodTargetBase = daily * daysDone;
-            const totalRequiredForTier = Math.ceil((targetP / 100) * currentPeriodTargetBase);
+            const totalRequiredForTier = (targetP / 100) * currentPeriodTargetBase;
             const moreNeeded = Math.max(0, totalRequiredForTier - completed);
             const targetTier = getTierData(targetP);
 
-            document.getElementById('daysLeft').textContent = (daysLeft < 0 ? 0 : daysLeft) + " days";
-            document.getElementById('moreNeeded').textContent = moreNeeded.toLocaleString();
-            document.getElementById('totalAttributesNeeded').textContent = totalRequiredForTier.toLocaleString();
-            document.getElementById('currentAttrDisplay').textContent = completed.toLocaleString();
-            document.getElementById('potentialIncentiveDisplay').textContent = `Rs. ${targetTier.a.toLocaleString()} (${targetTier.p}% tier)`;
-            
+            document.getElementById('daysLeft').textContent = formatDecimal(Math.max(0, daysLeft)) + " days";
+            document.getElementById('moreNeeded').textContent = formatDecimal(moreNeeded);
+            document.getElementById('totalAttributesNeeded').textContent = formatDecimal(totalRequiredForTier);
+            document.getElementById('currentAttrDisplay').textContent = formatDecimal(completed);
+            document.getElementById('potentialIncentiveDisplay').textContent = `${formatCurrency(targetTier.a)} (${targetTier.p}% tier)`;
+
             document.getElementById('targetResults').style.display = 'block';
         }
 
@@ -454,11 +509,13 @@
             const g = document.getElementById('chartGrid');
             const icon = document.getElementById('toggleIcon');
             const isHidden = g.style.display === 'none' || g.style.display === '';
-            
+
             g.style.display = isHidden ? 'grid' : 'none';
             if(isHidden) icon.classList.add('rotated');
             else icon.classList.remove('rotated');
         }
+
+        document.getElementById('copyrightYear').textContent = new Date().getFullYear();
 
         populateDropdown();
         generateChart();
