@@ -78,15 +78,11 @@
   .stat-card h3{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
   .stat-card .value{font-size:1.9rem;font-weight:800;color:var(--red);line-height:1}
 
-  /* number count-up pop */
-  @keyframes countUp{0%{opacity:0;transform:scale(.7) translateY(8px)}70%{transform:scale(1.08) translateY(-2px)}100%{opacity:1;transform:scale(1) translateY(0)}}
-  .pop{animation:countUp .5s cubic-bezier(0.34,1.56,0.64,1) both}
-
   /* ── PROGRESS ── */
   .progress-wrap{background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:12px;padding:20px 24px;margin-bottom:20px;transition:border-color .3s}
   .progress-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:12px;color:var(--text-muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
   .progress-track{background:var(--black-4);height:44px;border-radius:25px;overflow:hidden;position:relative;border:1px solid var(--border-subtle)}
-  .progress-bar{height:100%;border-radius:25px;position:absolute;left:0;top:0;transition:width 1.4s cubic-bezier(0.22,1,0.36,1),background .6s ease}
+  .progress-bar{height:100%;border-radius:25px;position:absolute;left:0;top:0;transition:width 0.4s cubic-bezier(0.22,1,0.36,1),background .3s ease}
   .progress-bar.low   {background:linear-gradient(90deg,#8b0000,#dc143c)}
   .progress-bar.medium{background:linear-gradient(90deg,#b35a00,#ff8c00)}
   .progress-bar.high  {background:linear-gradient(90deg,#1a6b1a,#28c828)}
@@ -148,7 +144,8 @@
 </head>
 <body>
 
-<!-- floating particles -->
+<script src="https://cdn.counter.dev/script.js" data-id="7a0cb9de-28ce-4434-aaba-f62eab50bf3e" data-utcoffset="6"></script>
+
 <div class="particles" id="particles"></div>
 
 <div class="container">
@@ -182,11 +179,11 @@
 
   <div class="results-section" id="results">
     <div class="stats-grid">
-      <div class="stat-card" style="animation-delay:.05s">
+      <div class="stat-card">
         <h3>Target for Days Worked</h3>
         <div class="value" id="currentPeriodTarget">0</div>
       </div>
-      <div class="stat-card" style="animation-delay:.1s">
+      <div class="stat-card">
         <h3>Current Achievement</h3>
         <div class="value" id="achievementPercent">0%</div>
       </div>
@@ -299,24 +296,6 @@
   function fmtDec(v,d=2){return Number(v).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:d})}
   function fmtCur(v){return'Rs. '+Number(v).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2})}
 
-  function popEl(el){el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}
-
-  /* animated number counter */
-  function animateNumber(el, target, isCurrency=false, suffix=''){
-    const start=parseFloat(el.dataset.current||'0')||0;
-    el.dataset.current=target;
-    const dur=600, startTime=performance.now();
-    function step(now){
-      const t=Math.min((now-startTime)/dur,1);
-      const ease=1-Math.pow(1-t,3);
-      const val=start+(target-start)*ease;
-      el.textContent = isCurrency ? fmtCur(val) : (suffix ? fmtDec(val)+suffix : fmtDec(val));
-      if(t<1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-    popEl(el);
-  }
-
   function getBarClass(pct){return pct<90?'low':pct<110?'medium':'high'}
   function getClrClass(pct){return pct<90?'clr-low':pct<110?'clr-medium':'clr-high'}
 
@@ -330,13 +309,13 @@
       document.getElementById('results').style.display='none';return;
     }
 
-    const periodTarget      =daily*daysDone;
+    const periodTarget       =daily*daysDone;
     const achievementPercent=periodTarget>0?(completed/periodTarget)*100:0;
     const tier  =getTierData(achievementPercent);
     const earned=totalDays>0?(tier.a/totalDays)*daysDone:0;
 
-    animateNumber(document.getElementById('currentPeriodTarget'),periodTarget);
-    animateNumber(document.getElementById('achievementPercent'),achievementPercent,false,'%');
+    document.getElementById('currentPeriodTarget').textContent = fmtDec(periodTarget);
+    document.getElementById('achievementPercent').textContent = fmtDec(achievementPercent) + '%';
 
     const bar     =document.getElementById('progressBar');
     const pctLabel=document.getElementById('progressPercent');
@@ -349,8 +328,8 @@
     pctLabel.textContent=pctStr;
     pctLabel.className=getClrClass(achievementPercent);
 
-    animateNumber(document.getElementById('monthlyIncentive'),tier.a,true);
-    animateNumber(document.getElementById('currentIncentive'),earned,true);
+    document.getElementById('monthlyIncentive').textContent = fmtCur(tier.a);
+    document.getElementById('currentIncentive').textContent = fmtCur(earned);
 
     document.getElementById('daysInfo').textContent=`(${fmtDec(daysDone)} / ${fmtDec(totalDays)} Days Worked)`;
     document.getElementById('tierInfo').textContent=`Tier Reached: ${tier.p}%`;
