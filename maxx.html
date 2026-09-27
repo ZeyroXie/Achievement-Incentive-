@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ZeyroX Achievements &amp; Incentive Calculator</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -13,20 +14,21 @@
     --surface:#141414;--surface-2:#1c1c1c;--surface-3:#242424;
     --border:rgba(220,20,60,0.22);--border-subtle:rgba(255,255,255,0.07);
     --text:#f0f0f0;--text-muted:#888;--text-dim:#555;
+    --good:#4ade80;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
   }
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
   body{font-family:'Inter','Segoe UI',sans-serif;background:var(--black);color:var(--text);min-height:100vh;padding:24px 16px 40px;overflow-x:hidden}
 
-  /* animated grid bg */
   body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(220,20,60,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(220,20,60,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;animation:gridPulse 8s ease-in-out infinite}
   @keyframes gridPulse{0%,100%{opacity:.5}50%{opacity:1}}
 
-  /* roaming radial orb */
   body::after{content:'';position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(220,20,60,0.07) 0%,transparent 70%);pointer-events:none;z-index:0;animation:orbFloat 14s ease-in-out infinite}
   @keyframes orbFloat{0%,100%{transform:translate(-10%,-10%)}33%{transform:translate(70%,10%)}66%{transform:translate(30%,60%)}}
 
   .container{max-width:1100px;margin:0 auto;position:relative;z-index:1}
 
-  /* ── HEADER ── */
   .header{text-align:center;margin-bottom:32px;padding:40px 30px 36px;background:linear-gradient(135deg,var(--surface) 0%,var(--black-3) 60%,var(--surface-2) 100%);border:1px solid var(--border);border-radius:20px;position:relative;overflow:hidden;animation:slideDown 0.7s cubic-bezier(0.22,1,0.36,1) both}
   .header::before{content:'';position:absolute;top:-2px;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--red),var(--red-dark),var(--red),transparent);background-size:200% 100%;animation:scanline 2.5s linear infinite}
   .header::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,var(--red-glow) 0%,transparent 65%);pointer-events:none;animation:headerGlow 4s ease-in-out infinite}
@@ -43,16 +45,12 @@
   .pulse-dot{width:7px;height:7px;background:var(--red);border-radius:50%;animation:pulseDot 1.4s ease-in-out infinite}
   @keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
 
-  /* ── CARDS ── */
   .card{background:var(--surface);border:1px solid var(--border-subtle);border-radius:16px;padding:28px;margin-bottom:24px;position:relative;overflow:hidden;transition:border-color 0.3s,box-shadow 0.3s,transform 0.3s;animation:fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) both}
   .card:hover{border-color:var(--border);box-shadow:0 0 40px var(--red-glow-sm);transform:translateY(-2px)}
   .card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--red),var(--red-dark));border-radius:3px 0 0 3px;animation:borderPulse 3s ease-in-out infinite}
   @keyframes borderPulse{0%,100%{opacity:.7}50%{opacity:1}}
-
-  /* corner sparkle */
   .card::after{content:'';position:absolute;top:0;right:0;width:80px;height:80px;background:radial-gradient(circle at top right,rgba(220,20,60,0.08) 0%,transparent 70%);pointer-events:none;animation:cornerGlow 4s ease-in-out infinite}
   @keyframes cornerGlow{0%,100%{opacity:.4}50%{opacity:1}}
-
   @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
   .card:nth-child(1){animation-delay:.05s}.card:nth-child(2){animation-delay:.12s}.card:nth-child(3){animation-delay:.19s}.card:nth-child(4){animation-delay:.26s}
 
@@ -60,16 +58,17 @@
   .card-title .icon{width:32px;height:32px;background:var(--red-glow);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;animation:iconBounce 3s ease-in-out infinite}
   @keyframes iconBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
 
-  /* ── INPUTS ── */
   .input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px}
   .input-group{position:relative}
   .input-group label{display:block;margin-bottom:8px;font-size:12px;font-weight:600;color:var(--text-muted);letter-spacing:0.6px;text-transform:uppercase;transition:color 0.2s}
   .input-group:focus-within label{color:var(--red)}
   .input-group input,.input-group select{width:100%;padding:13px 16px;background:var(--surface-3);border:1px solid var(--border-subtle);border-radius:10px;font-size:15px;color:var(--text);font-family:inherit;transition:border-color .25s,box-shadow .25s,background .25s,transform .2s;appearance:none}
+  .input-group input[type=number]::-webkit-outer-spin-button,
+  .input-group input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .input-group input[type=number]{-moz-appearance:textfield}
   .input-group input:focus,.input-group select:focus{outline:none;border-color:var(--red);background:var(--black-3);box-shadow:0 0 0 3px var(--red-glow-sm);transform:scale(1.01)}
   .input-group input::placeholder{color:var(--text-dim)}
 
-  /* ── STATS ── */
   .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px}
   .stat-card{background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:12px;padding:20px;text-align:center;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s;animation:fadeUp .5s ease both}
   .stat-card:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 12px 32px var(--red-glow-sm);border-color:var(--border)}
@@ -78,7 +77,6 @@
   .stat-card h3{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
   .stat-card .value{font-size:1.9rem;font-weight:800;color:var(--red);line-height:1}
 
-  /* ── PROGRESS ── */
   .progress-wrap{background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:12px;padding:20px 24px;margin-bottom:20px;transition:border-color .3s}
   .progress-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:12px;color:var(--text-muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
   .progress-track{background:var(--black-4);height:44px;border-radius:25px;overflow:hidden;position:relative;border:1px solid var(--border-subtle)}
@@ -86,7 +84,6 @@
   .progress-bar.low   {background:linear-gradient(90deg,#8b0000,#dc143c)}
   .progress-bar.medium{background:linear-gradient(90deg,#b35a00,#ff8c00)}
   .progress-bar.high  {background:linear-gradient(90deg,#1a6b1a,#28c828)}
-  /* moving shine */
   .progress-bar::after{content:'';position:absolute;top:0;left:-60%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:barShine 2.2s ease-in-out infinite}
   @keyframes barShine{0%{left:-60%}100%{left:120%}}
   .progress-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);z-index:2;letter-spacing:.5px}
@@ -94,24 +91,19 @@
   #progressPercent.clr-medium{color:#ff8c00}
   #progressPercent.clr-high  {color:#28c828}
 
-  /* ── INCENTIVE CARDS ── */
   .incentive-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:20px}
   .incentive-card{background:linear-gradient(135deg,var(--red-deep) 0%,var(--red-dark) 50%,var(--red) 100%);border:1px solid rgba(220,20,60,.5);border-radius:16px;padding:28px 24px;text-align:center;position:relative;overflow:hidden;transition:transform .3s,box-shadow .3s}
   .incentive-card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 20px 50px rgba(220,20,60,.4)}
-  /* animated inner ring */
   .incentive-card::before{content:'';position:absolute;top:50%;left:50%;width:200%;height:200%;border-radius:50%;border:1px solid rgba(255,255,255,0.06);transform:translate(-50%,-50%) scale(0);animation:ringExpand 3s ease-out infinite}
   @keyframes ringExpand{0%{transform:translate(-50%,-50%) scale(0);opacity:.6}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
-  /* top highlight */
   .incentive-card::after{content:'';position:absolute;top:-30%;left:-20%;width:60%;height:60%;background:radial-gradient(circle,rgba(255,255,255,0.09) 0%,transparent 70%);pointer-events:none;animation:topHighlight 4s ease-in-out infinite}
   @keyframes topHighlight{0%,100%{opacity:.5}50%{opacity:1}}
   .incentive-card h3{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:10px}
   .incentive-card .amount{font-size:2.2rem;font-weight:800;color:#fff;margin:6px 0 8px}
   .incentive-card p{font-size:12px;color:rgba(255,255,255,.65)}
 
-  /* ── RESULTS ── */
   .results-section{display:none;animation:fadeUp .5s ease both}
 
-  /* ── TARGET RESULTS ── */
   .target-results{display:none;margin-top:18px;background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:10px;padding:18px 20px;animation:fadeUp .3s ease both}
   .target-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-subtle);font-size:14px;transition:background .2s;border-radius:4px}
   .target-item:hover{background:rgba(220,20,60,0.04);padding-left:6px}
@@ -119,7 +111,6 @@
   .target-item span:first-child{color:var(--text-muted)}
   .target-item .val{font-weight:700;color:var(--red)}
 
-  /* ── CHART ── */
   .chart-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;padding:4px 0}
   .chart-grid{display:none;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:20px}
   .chart-item{background:var(--surface-3);border:1px solid var(--border-subtle);border-radius:10px;padding:12px 10px;text-align:center;transition:border-color .2s,transform .25s,background .2s,box-shadow .25s;animation:fadeUp .35s ease both}
@@ -129,22 +120,39 @@
   .toggle-icon{font-size:20px;color:var(--red);transition:transform .35s cubic-bezier(0.34,1.56,0.64,1);line-height:1}
   .toggle-icon.rotated{transform:rotate(180deg)}
 
-  /* ── FOOTER ── */
+  /* ── tracker additions ── */
+  .btn{border:none;border-radius:8px;padding:11px 20px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;transition:transform .2s,box-shadow .2s}
+  .btn-add{background:linear-gradient(135deg,var(--red-dark),var(--red));color:#fff}
+  .btn-add:hover{transform:translateY(-2px);box-shadow:0 8px 20px var(--red-glow-sm)}
+  .btn-cancel{background:transparent;color:var(--text-muted);border:1px solid var(--border-subtle)}
+  .btn-icon{padding:5px 10px;font-size:.75rem;margin-left:6px}
+  .table-wrap{overflow-x:auto;margin-top:4px}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th,td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--border-subtle);white-space:nowrap}
+  th{color:var(--text-muted);font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.5px}
+  tr:last-child td{border-bottom:none}
+  .eff{font-weight:800}
+  .eff-red{color:#ff4444}
+  .eff-orange{color:#ff8c00}
+  .eff-green{color:var(--good)}
+  .stat-card .value.eff-red{color:#ff4444}
+  .stat-card .value.eff-orange{color:#ff8c00}
+  .stat-card .value.eff-green{color:var(--good)}
+  .empty{color:var(--text-dim);text-align:center;padding:20px;font-size:.9rem}
+  .hint{font-size:.72rem;color:var(--text-dim);margin-top:8px}
+
   .site-footer{margin-top:32px;text-align:center;color:var(--text-dim);font-size:13px;animation:fadeUp .5s ease 1s both}
   .copyright-line{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 22px;border-radius:999px;background:var(--surface);border:1px solid var(--border-subtle);transition:border-color .3s,box-shadow .3s}
   .copyright-line:hover{border-color:var(--border);box-shadow:0 0 20px var(--red-glow-sm)}
   .company-name{font-weight:800;color:var(--red);letter-spacing:.5px;display:inline-block;animation:companyPulse 3s ease-in-out infinite}
   @keyframes companyPulse{0%,100%{text-shadow:none}50%{text-shadow:0 0 12px rgba(220,20,60,.5)}}
 
-  /* ── FLOATING PARTICLES ── */
   .particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
   .p{position:absolute;width:2px;height:2px;background:var(--red);border-radius:50%;opacity:0;animation:particleFloat linear infinite}
   @keyframes particleFloat{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:.6}90%{opacity:.2}100%{opacity:0;transform:translateY(-10vh) scale(1.5) translateX(var(--drift))}}
 </style>
 </head>
 <body>
-
-<script src="https://cdn.counter.dev/script.js" data-id="7a0cb9de-28ce-4434-aaba-f62eab50bf3e" data-utcoffset="6"></script>
 
 <div class="particles" id="particles"></div>
 
@@ -160,11 +168,11 @@
     <div class="input-grid">
       <div class="input-group">
         <label>Daily Target (Attributes)</label>
-        <input type="number" id="dailyTarget" value="3000" step="any" inputmode="decimal" oninput="autoCalculate()">
+        <input type="number" id="dailyTarget" value="3800" step="any" inputmode="decimal" oninput="autoCalculate()">
       </div>
       <div class="input-group">
         <label>Total Working Days</label>
-        <input type="number" id="totalWorkingDays" value="24" step="any" inputmode="decimal" oninput="autoCalculate()">
+        <input type="number" id="totalWorkingDays" value="21" step="any" inputmode="decimal" oninput="autoCalculate()">
       </div>
       <div class="input-group">
         <label>Days Worked So Far</label>
@@ -239,6 +247,48 @@
     <div class="chart-grid" id="chartGrid"></div>
   </div>
 
+  <!-- ── ATTRIBUTES AND EFFICIENCY TRACKER ── -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🎬</span> Attributes and Efficiency Tracker</div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><h3>Total Attributes</h3><div class="value" id="totAttr">0</div></div>
+      <div class="stat-card"><h3>Total Net Time</h3><div class="value" id="totTime" style="font-size:1.5rem">00:00:00</div></div>
+      <div class="stat-card"><h3>Efficiency (per hour)</h3><div class="value eff" id="totEff">0</div></div>
+    </div>
+
+    <div class="input-grid" style="margin-bottom:16px">
+      <div class="input-group">
+        <label>Attributes</label>
+        <input type="number" id="clipAttrInput" min="0" step="1" inputmode="numeric" pattern="[0-9]*">
+      </div>
+      <div class="input-group">
+        <label>Net Time (hh:mm:ss)</label>
+        <input type="text" id="clipTimeInput" inputmode="numeric" pattern="[0-9:]*">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:22px">
+      <button type="button" class="btn btn-add" id="clipSaveBtn" onclick="saveClipEntry()">Add</button>
+      <button type="button" class="btn btn-cancel" id="clipCancelBtn" style="display:none" onclick="cancelClipEdit()">Cancel</button>
+    </div>
+
+    <div class="card-title" style="font-size:1rem;margin-bottom:14px;justify-content:space-between">
+      <span style="display:flex;align-items:center;gap:10px"><span class="icon" style="width:26px;height:26px;font-size:12px">📋</span> Entries</span>
+      <span style="display:flex;gap:8px;align-items:center">
+        <span id="clipSavedMsg" style="font-size:.75rem;color:var(--good);opacity:0;transition:opacity .3s">Saved</span>
+        <button type="button" class="btn btn-cancel btn-icon" id="clipSaveAllBtn" onclick="clipManualSave()">Save</button>
+        <button type="button" class="btn btn-cancel btn-icon" id="clipClearBtn" onclick="clipClearAll()">Clear All</button>
+      </span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Clip #</th><th>Attributes</th><th>Net Time</th><th>Efficiency /hr</th><th></th></tr></thead>
+        <tbody id="clipRows"></tbody>
+      </table>
+      <div class="empty" id="clipEmptyMsg">No clips yet — add your first one above.</div>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <div class="copyright-line">
       <span>©</span><span id="copyrightYear"></span>
@@ -306,7 +356,9 @@
     const completed=parseFloat(document.getElementById('attributes').value);
 
     if(!Number.isFinite(daysDone)||!Number.isFinite(completed)){
-      document.getElementById('results').style.display='none';return;
+      document.getElementById('results').style.display='none';
+      clipRender();
+      return;
     }
 
     const periodTarget       =daily*daysDone;
@@ -336,6 +388,7 @@
 
     document.getElementById('results').style.display='block';
     calculateTargetAttributes();
+    clipRender();
   }
 
   function calculateTargetAttributes(){
@@ -373,6 +426,150 @@
   document.getElementById('copyrightYear').textContent=new Date().getFullYear();
   populateDropdown();
   generateChart();
+
+  /* ── ATTRIBUTES AND EFFICIENCY TRACKER ── */
+  const CLIP_STORE_KEY="attr_efficiency_entries_v1";
+  let clipEntries=[];
+  let clipEditingId=null;
+
+  function clipLoad(){
+    try{ const raw=localStorage.getItem(CLIP_STORE_KEY); clipEntries=raw?JSON.parse(raw):[]; }
+    catch(e){ clipEntries=[]; }
+  }
+  function clipSave(){ try{ localStorage.setItem(CLIP_STORE_KEY,JSON.stringify(clipEntries)); }catch(e){} }
+  function clipManualSave(){
+    clipSave();
+    const msg=document.getElementById("clipSavedMsg");
+    msg.style.opacity="1";
+    clearTimeout(window._clipSavedTimer);
+    window._clipSavedTimer=setTimeout(()=>{ msg.style.opacity="0"; },1800);
+  }
+  function clipParseTime(str){
+    str=str.trim();
+    if(str.includes(":")){
+      const parts=str.split(":").map(Number);
+      let h=0,m=0,s=0;
+      if(parts.length===3){[h,m,s]=parts}else if(parts.length===2){[m,s]=parts}
+      return (h||0)*60+(m||0)+(s||0)/60;
+    }
+    return parseFloat(str)||0;
+  }
+  function clipFmtTime(mins){
+    const totalSec=Math.round(mins*60);
+    const h=Math.floor(totalSec/3600), m=Math.floor((totalSec%3600)/60), s=totalSec%60;
+    return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  }
+  function clipRenumber(){ clipEntries.forEach((e,i)=>e.clip=i+1); }
+
+  function getTargetEfficiency(){
+    const daily=readNumber('dailyTarget',0);
+    const shiftHours=7+16/60; // 7h 16m standard shift
+    return shiftHours>0 ? daily/shiftHours : 0;
+  }
+  function effColorClass(eff){
+    const bench=getTargetEfficiency();
+    if(bench<=0) return '';
+    if(eff<bench) return 'eff-red';
+    if(eff<bench+20) return 'eff-orange';
+    return 'eff-green';
+  }
+
+  function clipRender(){
+    const tbody=document.getElementById("clipRows");
+    const emptyMsg=document.getElementById("clipEmptyMsg");
+    tbody.innerHTML="";
+    emptyMsg.style.display = clipEntries.length===0 ? "block" : "none";
+
+    let totAttr=0, totTimeMin=0;
+    clipEntries.forEach(e=>{
+      totAttr+=e.attributes; totTimeMin+=e.time;
+      const eff=e.time>0?(e.attributes/(e.time/60)):0;
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td>${e.clip}</td>
+        <td>${e.attributes}</td>
+        <td>${clipFmtTime(e.time)}</td>
+        <td class="eff ${effColorClass(eff)}">${eff.toFixed(2)}</td>
+        <td>
+          <button type="button" class="btn btn-cancel btn-icon" onclick="clipStartEdit(${e.id})">Edit</button>
+          <button type="button" class="btn btn-cancel btn-icon" onclick="clipRemove(${e.id})">Delete</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("totAttr").textContent=totAttr;
+    document.getElementById("totTime").textContent=clipFmtTime(totTimeMin);
+    const totEffVal = totTimeMin>0 ? (totAttr/(totTimeMin/60)) : 0;
+    const totEffEl = document.getElementById("totEff");
+    totEffEl.textContent = totEffVal.toFixed(2);
+    totEffEl.className = "value eff " + effColorClass(totEffVal);
+  }
+
+  function clipStartEdit(id){
+    const e=clipEntries.find(x=>x.id===id); if(!e)return;
+    clipEditingId=id;
+    document.getElementById("clipAttrInput").value=e.attributes;
+    document.getElementById("clipTimeInput").value=clipFmtTime(e.time);
+    document.getElementById("clipSaveBtn").textContent="Save";
+    document.getElementById("clipCancelBtn").style.display="inline-block";
+  }
+  function cancelClipEdit(){
+    clipEditingId=null;
+    document.getElementById("clipAttrInput").value="";
+    document.getElementById("clipTimeInput").value="";
+    document.getElementById("clipSaveBtn").textContent="Add";
+    document.getElementById("clipCancelBtn").style.display="none";
+  }
+  function clipRemove(id){
+    clipEntries=clipEntries.filter(x=>x.id!==id);
+    clipRenumber(); clipSave(); clipRender();
+    if(clipEditingId===id) cancelClipEdit();
+  }
+  let clipClearArmed=false;
+  let clipClearTimer=null;
+  function clipClearAll(){
+    const btn=document.getElementById("clipClearBtn");
+    if(clipEntries.length===0) return;
+    if(!clipClearArmed){
+      clipClearArmed=true;
+      btn.textContent="Tap again to confirm";
+      btn.style.color="#ff4444";
+      btn.style.borderColor="#ff4444";
+      clearTimeout(clipClearTimer);
+      clipClearTimer=setTimeout(()=>{
+        clipClearArmed=false;
+        btn.textContent="Clear All";
+        btn.style.color="";
+        btn.style.borderColor="";
+      },3000);
+      return;
+    }
+    clearTimeout(clipClearTimer);
+    clipClearArmed=false;
+    btn.textContent="Clear All";
+    btn.style.color="";
+    btn.style.borderColor="";
+    clipEntries=[];
+    clipSave(); clipRender();
+    cancelClipEdit();
+  }
+  function saveClipEntry(){
+    const attributes=parseInt(document.getElementById("clipAttrInput").value,10)||0;
+    const time=clipParseTime(document.getElementById("clipTimeInput").value||"0");
+    if(clipEditingId!==null){
+      const e=clipEntries.find(x=>x.id===clipEditingId);
+      e.attributes=attributes; e.time=time;
+      cancelClipEdit();
+    } else {
+      clipEntries.push({id:Date.now()+Math.random(),attributes,time});
+      clipRenumber();
+      document.getElementById("clipAttrInput").value="";
+      document.getElementById("clipTimeInput").value="";
+    }
+    clipSave(); clipRender();
+  }
+
+  clipLoad(); clipRenumber(); clipRender();
 </script>
 </body>
 </html>
