@@ -264,7 +264,13 @@
       </div>
       <div class="input-group">
         <label>Net Time (hh:mm:ss)</label>
-        <input type="text" id="clipTimeInput" inputmode="numeric" pattern="[0-9:]*">
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="text" id="clipHH" maxlength="2" inputmode="numeric" pattern="[0-9]*" placeholder="00" style="width:100%;text-align:center;padding:13px 8px">
+          <span style="color:var(--text-muted);font-weight:700">:</span>
+          <input type="text" id="clipMM" maxlength="2" inputmode="numeric" pattern="[0-9]*" placeholder="00" style="width:100%;text-align:center;padding:13px 8px">
+          <span style="color:var(--text-muted);font-weight:700">:</span>
+          <input type="text" id="clipSS" maxlength="2" inputmode="numeric" pattern="[0-9]*" placeholder="00" style="width:100%;text-align:center;padding:13px 8px">
+        </div>
       </div>
     </div>
     <div style="display:flex;gap:10px;margin-bottom:22px">
@@ -461,6 +467,39 @@
   }
   function clipRenumber(){ clipEntries.forEach((e,i)=>e.clip=i+1); }
 
+  function setupTimeAutoAdvance(){
+    const hh=document.getElementById('clipHH');
+    const mm=document.getElementById('clipMM');
+    const ss=document.getElementById('clipSS');
+    [[hh,mm,null],[mm,ss,hh],[ss,null,mm]].forEach(([cur,next,prev])=>{
+      cur.addEventListener('input',()=>{
+        cur.value=cur.value.replace(/[^0-9]/g,'').slice(0,2);
+        if(cur.value.length===2 && next) next.focus();
+      });
+      cur.addEventListener('keydown',e=>{
+        if(e.key==='Backspace' && cur.value==='' && prev) prev.focus();
+      });
+    });
+  }
+  function clipReadTimeFields(){
+    const h=parseInt(document.getElementById('clipHH').value,10)||0;
+    const m=parseInt(document.getElementById('clipMM').value,10)||0;
+    const s=parseInt(document.getElementById('clipSS').value,10)||0;
+    return h*60+m+s/60;
+  }
+  function clipSetTimeFields(mins){
+    const totalSec=Math.round(mins*60);
+    const h=Math.floor(totalSec/3600), m=Math.floor((totalSec%3600)/60), s=totalSec%60;
+    document.getElementById('clipHH').value=String(h).padStart(2,"0");
+    document.getElementById('clipMM').value=String(m).padStart(2,"0");
+    document.getElementById('clipSS').value=String(s).padStart(2,"0");
+  }
+  function clipClearTimeFields(){
+    document.getElementById('clipHH').value="";
+    document.getElementById('clipMM').value="";
+    document.getElementById('clipSS').value="";
+  }
+
   function getTargetEfficiency(){
     const daily=readNumber('dailyTarget',0);
     const shiftHours=7+16/60; // 7h 16m standard shift
@@ -509,14 +548,14 @@
     const e=clipEntries.find(x=>x.id===id); if(!e)return;
     clipEditingId=id;
     document.getElementById("clipAttrInput").value=e.attributes;
-    document.getElementById("clipTimeInput").value=clipFmtTime(e.time);
+    clipSetTimeFields(e.time);
     document.getElementById("clipSaveBtn").textContent="Save";
     document.getElementById("clipCancelBtn").style.display="inline-block";
   }
   function cancelClipEdit(){
     clipEditingId=null;
     document.getElementById("clipAttrInput").value="";
-    document.getElementById("clipTimeInput").value="";
+    clipClearTimeFields();
     document.getElementById("clipSaveBtn").textContent="Add";
     document.getElementById("clipCancelBtn").style.display="none";
   }
@@ -555,7 +594,7 @@
   }
   function saveClipEntry(){
     const attributes=parseInt(document.getElementById("clipAttrInput").value,10)||0;
-    const time=clipParseTime(document.getElementById("clipTimeInput").value||"0");
+    const time=clipReadTimeFields();
     if(clipEditingId!==null){
       const e=clipEntries.find(x=>x.id===clipEditingId);
       e.attributes=attributes; e.time=time;
@@ -564,12 +603,12 @@
       clipEntries.push({id:Date.now()+Math.random(),attributes,time});
       clipRenumber();
       document.getElementById("clipAttrInput").value="";
-      document.getElementById("clipTimeInput").value="";
+      clipClearTimeFields();
     }
     clipSave(); clipRender();
   }
 
-  clipLoad(); clipRenumber(); clipRender();
+  clipLoad(); clipRenumber(); clipRender(); setupTimeAutoAdvance();
 </script>
 </body>
 </html>
